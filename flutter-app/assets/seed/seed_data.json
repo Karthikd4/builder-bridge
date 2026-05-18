@@ -1,0 +1,74 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "Prestige Heights",
+      "builder_name": "Prestige Constructions",
+      "location": "Whitefield, Bangalore",
+      "description": "Premium residential towers with world-class amenities",
+      "created_at": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "towers": [
+    { "id": 1, "project_id": 1, "name": "Tower A", "total_floors": 20 },
+    { "id": 2, "project_id": 1, "name": "Tower B", "total_floors": 18 }
+  ],
+  "units": [
+    { "id": 1,  "tower_id": 1, "floor": 3, "unit_no": "301", "type": "2BHK", "area_sqft": 1150.0, "status": "available",  "base_price": 8500000 },
+    { "id": 2,  "tower_id": 1, "floor": 3, "unit_no": "302", "type": "3BHK", "area_sqft": 1450.0, "status": "reserved",   "base_price": 10800000 },
+    { "id": 3,  "tower_id": 1, "floor": 3, "unit_no": "303", "type": "2BHK", "area_sqft": 1150.0, "status": "booked",     "base_price": 8500000 },
+    { "id": 4,  "tower_id": 1, "floor": 4, "unit_no": "401", "type": "2BHK", "area_sqft": 1150.0, "status": "available",  "base_price": 8700000 },
+    { "id": 5,  "tower_id": 1, "floor": 4, "unit_no": "402", "type": "3BHK", "area_sqft": 1450.0, "status": "available",  "base_price": 11000000 },
+    { "id": 6,  "tower_id": 1, "floor": 5, "unit_no": "501", "type": "2BHK", "area_sqft": 1150.0, "status": "available",  "base_price": 8900000 },
+    { "id": 7,  "tower_id": 2, "floor": 3, "unit_no": "301", "type": "3BHK", "area_sqft": 1600.0, "status": "available",  "base_price": 12000000 },
+    { "id": 8,  "tower_id": 2, "floor": 3, "unit_no": "302", "type": "4BHK", "area_sqft": 2100.0, "status": "reserved",   "base_price": 16500000 }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "phone": "9999999999",
+      "name": "Demo Buyer",
+      "email": "demo@builderbridge.in",
+      "created_at": "2026-01-15T10:00:00.000Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": 1,
+      "unit_id": 3,
+      "user_id": 1,
+      "status": "confirmed",
+      "token_amount": 500000,
+      "booked_at": "2026-02-01T10:00:00.000Z"
+    }
+  ],
+  "payment_milestones": [
+    { "id": 1, "booking_id": 1, "label": "Token Amount",       "amount": 500000,  "due_date": "2026-02-01T00:00:00.000Z", "paid_at": "2026-02-01T11:00:00.000Z" },
+    { "id": 2, "booking_id": 1, "label": "On Agreement",       "amount": 750000,  "due_date": "2026-03-01T00:00:00.000Z", "paid_at": "2026-03-02T09:00:00.000Z" },
+    { "id": 3, "booking_id": 1, "label": "On Foundation",      "amount": 1200000, "due_date": "2026-05-01T00:00:00.000Z", "paid_at": null },
+    { "id": 4, "booking_id": 1, "label": "On Slab — 5th Flr",  "amount": 1200000, "due_date": "2026-08-01T00:00:00.000Z", "paid_at": null },
+    { "id": 5, "booking_id": 1, "label": "On Completion",      "amount": 4350000, "due_date": "2027-02-01T00:00:00.000Z", "paid_at": null }
+  ],
+  "tickets": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "booking_id": 1,
+      "title": "Need updated payment schedule",
+      "description": "Please share the revised payment timeline for Q3 milestone.",
+      "status": "open",
+      "created_at": "2026-05-10T09:00:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "type": "payment_due",
+      "title": "Payment Due in 3 Days",
+      "body": "On Foundation — ₹1,20,000 due on 1 May 2026",
+      "read_at": null,
+      "created_at": "2026-04-28T08:00:00.000Z"
+    }
+  ]
+}

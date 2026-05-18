@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BuilderBridge — Screens overview</title>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0f1424;
+    color: #fff;
+  }
+  #root { height: 100vh; }
+  .hide-scroll::-webkit-scrollbar { display: none; }
+  .hide-scroll { scrollbar-width: none; }
+  button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="brand.jsx"></script>
+<script type="text/babel" src="tokens.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="inventory-data.jsx"></script>
+<script type="text/babel" src="inventory-views.jsx"></script>
+<script type="text/babel" src="inventory-controls.jsx"></script>
+<script type="text/babel" src="inventory-explorer.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+
+<script type="text/babel">
+
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "dark": false,
+  "builder": "builderbridge"
+}/*EDITMODE-END*/;
+
+// ────────────────────────────────────────────────────────────
+// A single canvas-mounted screen — iOS frame around a screen render
+// ────────────────────────────────────────────────────────────
+function ScreenFrame({ title, stage, dark, builder, render }) {
+  const t = useTokens(dark, builder);
+  const titleBar = title ? (
+    <TopBar
+      t={t}
+      leading={(
+        <div style={{
+          width: 36, height: 36, borderRadius: 10, background: t.accent,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: builder.accentInk, flexShrink: 0,
+        }}>
+          <BBMark size={20} color={builder.accentInk}/>
+        </div>
+      )}
+      title={title.title}
+      subtitle={title.sub}
+      trailing={(
+        <button style={{
+          width: 36, height: 36, borderRadius: 10, background: t.surfaceMute,
+          border: 'none', position: 'relative',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.ink,
+        }}>
+          <Icon name="bell" size={18}/>
+          <span style={{
+            position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%',
+            background: t.danger, border: `1.5px solid ${t.surfaceMute}`,
+          }}/>
+        </button>
+      )}
+    />
+  ) : null;
+  return (
+    <IOSDevice width={402} height={874} dark={dark}>
+      <div style={{
+        width: '100%', height: '100%',
+        background: t.bg, color: t.ink,
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
+      }}>
+        {titleBar}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+          {render(t)}
+        </div>
+        <BottomTabs t={t} current={title?.tab} onChange={() => {}}/>
+      </div>
+    </IOSDevice>
+  );
+}
+
+function App() {
+  const [t_, setTweak] = useTweaks(TWEAKS);
+  const builder = BUILDERS[t_.builder] || BUILDERS.builderbridge;
+  const nav = () => {};
+
+  const onboardingFrame = (step) => (
+    <IOSDevice width={402} height={874} dark={t_.dark}>
+      <div style={{ width: '100%', height: '100%', background: (t_.dark ? DARK : LIGHT).bg,
+        position: 'relative', overflow: 'hidden' }}>
+        <OnboardingScreen
+          t={useTokens(t_.dark, builder)}
+          builder={builder} step={step}
+          onAdvance={() => {}} onSkip={() => {}}/>
+      </div>
+    </IOSDevice>
+  );
+
+  // Build a config of screens to render
+  const sections = [
+    {
+      id: 'onboarding', title: 'Onboarding',
+      sub: 'First-time buyer flow — phone OTP → welcome.',
+      boards: [
+        { id: 'splash', label: 'Welcome',  render: () => onboardingFrame(0) },
+        { id: 'phone',  label: 'Phone',    render: () => onboardingFrame(1) },
+        { id: 'otp',    label: 'OTP',      render: () => onboardingFrame(2) },
+        { id: 'done',   label: 'Done',     render: () => onboardingFrame(3) },
+      ],
+    },
+    {
+      id: 'core', title: 'Core dashboard',
+      sub: 'The 5 bottom-tab destinations.',
+      boards: [
+        { id: 'home',      label: 'Home · Booked',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: builder.project, sub: `${builder.location} · RERA ${builder.rera}`, tab: 'home' }}
+              render={(t) => <HomeScreen t={t} builder={builder} stage="signed" nav={nav}/>}
+            />
+          )
+        },
+        { id: 'home_prospect', label: 'Home · Prospect',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: builder.project, sub: `${builder.location} · RERA ${builder.rera}`, tab: 'home' }}
+              render={(t) => <HomeScreen t={t} builder={builder} stage="prospect" nav={nav}/>}
+            />
+          )
+        },
+        { id: 'payments', label: 'Payments',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Payments', sub: '10-milestone schedule', tab: 'payments' }}
+              render={(t) => <PaymentsScreen t={t} builder={builder} nav={nav}/>}
+            />
+          )
+        },
+        { id: 'documents', label: 'Documents',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Documents', sub: 'Vault', tab: 'documents' }}
+              render={(t) => <DocumentsScreen t={t} builder={builder} nav={nav}/>}
+            />
+          )
+        },
+        { id: 'updates', label: 'Updates',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Updates', sub: 'Activity & alerts', tab: 'updates' }}
+              render={(t) => <UpdatesScreen t={t}/>}
+            />
+          )
+        },
+        { id: 'profile', label: 'Profile',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Profile', sub: BUYER.name, tab: 'profile' }}
+              render={(t) => <ProfileScreen t={t} builder={builder}/>}
+            />
+          )
+        },
+      ],
+    },
+    {
+      id: 'flows', title: 'Booking flows',
+      sub: 'Inventory → cost estimate → agreement signing.',
+      boards: [
+        { id: 'inventory', label: 'Inventory',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Inventory', sub: `${builder.project} · Block A` }}
+              render={(t) => <InventoryScreen t={t} builder={builder} nav={nav}/>}
+            />
+          )
+        },
+        { id: 'unit_detail', label: 'Unit detail',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: builder.unit, sub: builder.typology }}
+              render={(t) => <UnitDetailScreen t={t} builder={builder} nav={nav}/>}
+            />
+          )
+        },
+        { id: 'estimate', label: 'Cost estimate',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Cost estimate', sub: `${builder.unit} · v3 final` }}
+              render={(t) => <EstimateScreen t={t} builder={builder}/>}
+            />
+          )
+        },
+        { id: 'aos_review', label: 'AOS · Review',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Agreement of Sale', sub: 'Draft v2' }}
+              render={(t) => <AOSScreen t={t} builder={builder} stage="aos" nav={nav}/>}
+            />
+          )
+        },
+        { id: 'aos_signed', label: 'AOS · Signed',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Agreement of Sale', sub: 'Signed copy' }}
+              render={(t) => <AOSScreen t={t} builder={builder} stage="signed" nav={nav}/>}
+            />
+          )
+        },
+      ],
+    },
+    {
+      id: 'support', title: 'Financial & support',
+      sub: 'Receipts, loan tracking, support tickets — the post-booking lifecycle.',
+      boards: [
+        { id: 'receipts', label: 'Receipts',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Receipts & invoices', sub: '2 payments cleared' }}
+              render={(t) => <ReceiptsScreen t={t}/>}
+            />
+          )
+        },
+        { id: 'loan', label: 'Loan tracking',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Home loan', sub: 'HDFC · ₹1.85 Cr' }}
+              render={(t) => <LoanScreen t={t} builder={builder}/>}
+            />
+          )
+        },
+        { id: 'tickets', label: 'Support tickets',
+          render: () => (
+            <ScreenFrame dark={t_.dark} builder={builder}
+              title={{ title: 'Support', sub: 'SLA-tracked' }}
+              render={(t) => <TicketsScreen t={t}/>}
+            />
+          )
+        },
+      ],
+    },
+  ];
+
+  return (
+    <>
+      <DesignCanvas title="BuilderBridge — Buyer app · screen overview"
+                    subtitle="Mobile-first buyer experience for Builder CRM + Transparency Platform">
+        {sections.map((sec) => (
+          <DCSection key={sec.id} id={sec.id} title={sec.title} subtitle={sec.sub}>
+            {sec.boards.map((b) => (
+              <DCArtboard key={b.id} id={b.id} label={b.label} width={402} height={874}>
+                {b.render()}
+              </DCArtboard>
+            ))}
+          </DCSection>
+        ))}
+      </DesignCanvas>
+
+      <TweaksPanel title="Canvas tweaks">
+        <TweakSection label="Theme">
+          <TweakToggle label="Dark mode" value={t_.dark}
+                       onChange={(v) => setTweak('dark', v)}/>
+        </TweakSection>
+        <TweakSection label="Builder white-label">
+          <TweakSelect label="Builder" value={t_.builder}
+                       options={BUILDER_KEYS.map((k) => ({ value: k, label: BUILDERS[k].name }))}
+                       onChange={(v) => setTweak('builder', v)}/>
+          <TweakColor label="Accent" value={builder.accent}
+                      options={BUILDER_KEYS.map((k) => BUILDERS[k].accent)}
+                      onChange={(v) => {
+                        const key = BUILDER_KEYS.find((k) => BUILDERS[k].accent === v);
+                        if (key) setTweak('builder', key);
+                      }}/>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

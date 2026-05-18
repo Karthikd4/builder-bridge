@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\donagalk\\\\OneDrive - Bristol Myers Squibb\\\\Documents\\\\Karthik_Latest\\\\builder-bridge\" -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(flutter --version)",
+      "PowerShell(flutter *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(cmd /c \"dir C:\\\\flutter /b\")",
+      "Bash(dart run *)",
+      "Bash(Start-Sleep -Seconds 15)",
+      "Bash(Get-Content \"C:\\\\Users\\\\donagalk\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-donagalk-OneDrive---Bristol-Myers-Squibb-Documents-Karthik-Latest-builder-bridge\\\\d8921d5f-4557-46e4-9131-63f878bfa559\\\\tasks\\\\bcvq2aobv.output\")",
+      "Bash(Select-Object -Last 30)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter run *)",
+      "Bash(flutter clean *)",
+      "Bash(taskkill /F /IM \"flutter_tools.snapshot\")",
+      "Bash(taskkill /F /IM \"dart.exe\")",
+      "Bash(taskkill /F /IM \"flutter.bat\")",
+      "PowerShell(Get-Process *)",
+      "Bash(flutter devices *)",
+      "Bash(flutter emulators *)"
+    ]
+  }
+}
