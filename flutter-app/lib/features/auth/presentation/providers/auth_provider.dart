@@ -63,7 +63,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> sendOtp(String phone) async {
     state = state.copyWith(isLoading: true, clearError: true);
-    await Future.delayed(const Duration(milliseconds: 800)); // simulated network
+    await Future.delayed(const Duration(milliseconds: 300)); // simulated network
     state = state.copyWith(isLoading: false, otpSent: true);
   }
 

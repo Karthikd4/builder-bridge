@@ -8,4 +8,10 @@ abstract final class AppRoutes {
   static const payments = '/payments';
   static const documents = '/documents';
   static const support = '/support';
+
+  static String towerFloor(int towerId) => '/inventory/tower/$towerId';
+  static const estimate = '/estimate';
+  static const bookingConfirm = '/booking/confirm';
+  static const supportNew = '/support/new';
+  static String supportDetail(int id) => '/support/$id';
 }

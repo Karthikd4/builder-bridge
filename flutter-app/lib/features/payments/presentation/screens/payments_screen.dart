@@ -1,20 +1,172 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:builder_bridge/core/navigation/app_routes.dart';
+import 'package:builder_bridge/core/theme/app_colors.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
+import 'package:builder_bridge/core/widgets/bb_empty_state.dart';
+import 'package:builder_bridge/core/widgets/bb_error_state.dart';
+import 'package:builder_bridge/core/widgets/bb_loading_state.dart';
+import 'package:builder_bridge/features/payments/data/models/payment_summary.dart';
+import 'package:builder_bridge/features/payments/presentation/providers/payments_provider.dart';
+import 'package:builder_bridge/features/payments/presentation/widgets/payment_due_banner.dart';
+import 'package:builder_bridge/features/payments/presentation/widgets/payment_milestone_row.dart';
+import 'package:builder_bridge/features/payments/presentation/widgets/payment_summary_card.dart';
 
-// TODO Sprint 4: payment timeline, milestones, receipts
-class PaymentsScreen extends StatelessWidget {
+class PaymentsScreen extends ConsumerWidget {
   const PaymentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(currentPaymentSummaryProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Payments')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Text('Payments — Sprint 4', style: AppTypography.bodyLarge),
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(
+        backgroundColor: AppColors.bg,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text('Payments', style: AppTypography.labelLarge),
       ),
+      body: summaryAsync.when(
+        loading: () => const BBLoadingState(),
+        error: (_, __) => BBErrorState(
+          message: 'Could not load payment schedule',
+          onRetry: () => ref.invalidate(currentPaymentSummaryProvider),
+        ),
+        data: (summary) {
+          if (summary == null) {
+            return BBEmptyState(
+              icon: Icons.receipt_long_outlined,
+              message: 'Book a unit to view your payment schedule.',
+              ctaLabel: 'Browse Inventory',
+              onCta: () => context.go(AppRoutes.inventory),
+            );
+          }
+          return _PaymentsBody(summary: summary);
+        },
+      ),
+    );
+  }
+}
+
+class _PaymentsBody extends ConsumerWidget {
+  final PaymentSummary summary;
+  const _PaymentsBody({required this.summary});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nextDue = summary.nextDue;
+    final isPaying = ref.watch(milestonePaymentNotifierProvider) is AsyncLoading;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.xxl + bottomInset,
+      ),
+      children: [
+        _SectionHeader(
+          eyebrow: 'PAYMENT SCHEDULE',
+          title: '${summary.totalCount} milestones',
+        ),
+        const SizedBox(height: AppSpacing.md),
+        PaymentSummaryCard(summary: summary),
+        if (nextDue != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          PaymentDueBanner(
+            milestone: nextDue,
+            onPay: isPaying
+                ? null
+                : () => _confirmPay(context, ref, nextDue.id, nextDue.label),
+          ),
+        ],
+        const SizedBox(height: AppSpacing.lg),
+        const _SectionHeader(eyebrow: 'ALL MILESTONES'),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(color: AppColors.line),
+          ),
+          child: Column(
+            children: List.generate(summary.milestones.length, (i) {
+              final m = summary.milestones[i];
+              return PaymentMilestoneRow(
+                milestone: m,
+                index: i + 1,
+                showDivider: i < summary.milestones.length - 1,
+                isNextDue: nextDue?.id == m.id,
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+      ],
+    );
+  }
+
+  void _confirmPay(
+      BuildContext context, WidgetRef ref, int milestoneId, String label) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Payment'),
+        content: Text('Mark "$label" as paid?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref
+                  .read(milestonePaymentNotifierProvider.notifier)
+                  .markPaid(milestoneId);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$label marked as paid'),
+                    backgroundColor: AppColors.ok,
+                  ),
+                );
+              }
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String eyebrow;
+  final String? title;
+  const _SectionHeader({required this.eyebrow, this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(eyebrow,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.inkFaint,
+              letterSpacing: 0.6,
+            )),
+        if (title != null) ...[
+          const SizedBox(height: 2),
+          Text(title!, style: AppTypography.headlineMedium),
+        ],
+      ],
     );
   }
 }

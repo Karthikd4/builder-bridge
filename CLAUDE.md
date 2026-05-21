@@ -117,11 +117,11 @@ Use these patterns — don't invent new approaches:
 |---|---|---|
 | Pre-Sprint | ✅ Done | Design refs organized, README updated, agent/skill system created |
 | Sprint 1 | ✅ Done | Flutter scaffold, design system, auth flow (login/OTP/success/dashboard shell) |
-| Sprint 2 | ⏳ Next | Inventory + project screens |
-| Sprint 3 | — | Estimates + booking |
-| Sprint 4 | — | Payments + dashboard |
-| Sprint 5 | — | Documents + support + notifications |
-| Sprint 6 | — | Polish + demo-ready |
+| Sprint 2 | ✅ Done | Inventory + project screens |
+| Sprint 3 | ✅ Done | Estimates + booking |
+| Sprint 4 | ✅ Done | Payments + dashboard |
+| Sprint 5 | ✅ Done | Documents + support + notifications |
+| Sprint 6 | ⏳ Next | Polish + demo-ready |
 
 ---
 
