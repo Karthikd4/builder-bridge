@@ -115,7 +115,7 @@ class _PhoneField extends StatelessWidget {
       ],
       style: AppTypography.bodyLarge,
       decoration: InputDecoration(
-        hintText: '98480 12211',
+        hintText: 'xxxxx xxxxx',
         prefixText: '+91  ',
         prefixStyle: AppTypography.bodyLarge.copyWith(color: AppColors.inkMute),
         filled: true,

@@ -46,7 +46,14 @@ class DashboardHomeScreen extends ConsumerWidget {
             Text('Whitefield, Bangalore', style: AppTypography.labelSmall),
           ],
         ),
-        actions: const [NotificationsBell()],
+        actions: [
+          const NotificationsBell(),
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.inkMute),
+            tooltip: 'Logout',
+            onPressed: () => ref.read(authProvider.notifier).logout(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
