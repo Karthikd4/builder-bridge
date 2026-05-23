@@ -116,7 +116,7 @@ class BookingRepository {
       ('Agreement',  'Booking Confirmation Letter.pdf',          'signed'),
       ('Agreement',  'Agreement of Sale — Draft v1.pdf',         'under_review'),
       ('Plans',      'Unit $unitNo — Floor plan.pdf',            'ready'),
-      ('Plans',      'Prestige Heights — Master layout.pdf',     'ready'),
+      ('Plans',      'The Vue Residences — Master layout.pdf',     'ready'),
       ('Compliance', 'RERA Certificate — P02400006789.pdf',      'ready'),
       ('Compliance', 'Title deed — Survey 138/2.pdf',            'ready'),
       ('Receipts',   'Receipt — Token Amount $tokenFormatted.pdf', 'ready'),

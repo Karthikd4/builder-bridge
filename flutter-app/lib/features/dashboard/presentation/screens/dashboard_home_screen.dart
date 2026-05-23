@@ -40,10 +40,10 @@ class DashboardHomeScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Prestige Heights',
+            Text('The Vue Residences',
                 style:
                     AppTypography.labelLarge.copyWith(color: AppColors.ink)),
-            Text('Whitefield, Bangalore', style: AppTypography.labelSmall),
+            Text('Puppalaguda, Hyderabad', style: AppTypography.labelSmall),
           ],
         ),
         actions: [
