@@ -6,6 +6,7 @@ import 'package:builder_bridge/core/navigation/app_routes.dart';
 import 'package:builder_bridge/core/theme/app_colors.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
+import 'package:builder_bridge/core/widgets/bb_logo.dart';
 import 'package:builder_bridge/features/auth/presentation/providers/auth_provider.dart';
 import 'package:builder_bridge/features/dashboard/presentation/widgets/dashboard_hero_card.dart';
 import 'package:builder_bridge/features/dashboard/presentation/widgets/dashboard_journey_card.dart';
@@ -34,8 +35,7 @@ class DashboardHomeScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: const Padding(
           padding: EdgeInsets.only(left: AppSpacing.md),
-          child: Icon(Icons.cottage_outlined,
-              color: AppColors.accent, size: 26),
+          child: BBLogo(size: 28),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
