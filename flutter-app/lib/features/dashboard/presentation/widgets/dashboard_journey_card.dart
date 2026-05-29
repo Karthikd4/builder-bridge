@@ -17,8 +17,9 @@ class DashboardJourneyCard extends ConsumerWidget {
     return bookingAsync.when(
       loading: () => const SizedBox(height: 72, child: BBLoadingState()),
       error: (_, __) => const _JourneyPlaceholder(),
-      data: (booking) =>
-          booking == null ? const _JourneyPlaceholder() : _JourneySteps(booking: booking),
+      data: (booking) => booking == null
+          ? const _JourneyPlaceholder()
+          : _JourneySteps(booking: booking),
     );
   }
 }
@@ -48,57 +49,138 @@ class _JourneySteps extends StatelessWidget {
   final BookingModel booking;
   const _JourneySteps({required this.booking});
 
+  static const _steps = [
+    (label: 'Enquiry',    sub: 'Apr 02'),
+    (label: 'Site visit', sub: 'Apr 14'),
+    (label: 'Estimate',   sub: 'Apr 22'),
+    (label: 'Booked',     sub: 'May 03'),
+    (label: 'AOS',        sub: 'May 18'),
+    (label: 'Reg.',       sub: 'Jul \'26'),
+    (label: 'Handover',   sub: 'Q4 \'27'),
+  ];
+
+  int get _currentIdx {
+    return switch (booking.status) {
+      'reserved'  => 3,
+      'confirmed' => 4,
+      'completed' => 6,
+      _           => 3,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final status = booking.status;
-    final confirmedOrLater = status == 'confirmed' || status == 'completed';
-    final steps = [
-      (label: 'Interest', done: true),
-      (label: 'Token', done: booking.tokenAmount > 0),
-      (label: 'Agreement', done: confirmedOrLater),
-      (label: 'Possession', done: status == 'completed'),
-    ];
-
+    final current = _currentIdx;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md, horizontal: AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(color: AppColors.line),
       ),
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (i) {
-          if (i.isOdd) {
-            return Expanded(
-              child: Container(
-                height: 2,
-                color: steps[i ~/ 2].done ? AppColors.ok : AppColors.line,
-              ),
-            );
-          }
-          final step = steps[i ~/ 2];
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(_steps.length * 2 - 1, (i) {
+            if (i.isOdd) {
+              final stepIdx = i ~/ 2;
+              final done = stepIdx < current;
+              return SizedBox(
                 width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: step.done ? AppColors.ok : AppColors.line,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  step.done ? Icons.check_rounded : Icons.circle_outlined,
-                  size: 14,
-                  color: step.done ? Colors.white : AppColors.inkFaint,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(step.label,
-                  style: AppTypography.labelSmall.copyWith(fontSize: 10)),
-            ],
-          );
-        }),
+                child: Container(
+                    height: 2,
+                    color: done ? AppColors.ok : AppColors.line),
+              );
+            }
+            final stepIdx = i ~/ 2;
+            final step = _steps[stepIdx];
+            final done = stepIdx < current;
+            final isCurrent = stepIdx == current;
+            return _StepDot(
+              label: step.label,
+              sub: step.sub,
+              done: done,
+              isCurrent: isCurrent,
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class _StepDot extends StatelessWidget {
+  final String label;
+  final String sub;
+  final bool done;
+  final bool isCurrent;
+
+  const _StepDot({
+    required this.label,
+    required this.sub,
+    required this.done,
+    required this.isCurrent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dotColor = done
+        ? AppColors.ok
+        : isCurrent
+            ? AppColors.accent
+            : AppColors.line;
+    final dotBorder = isCurrent && !done
+        ? Border.all(color: AppColors.accent, width: 2)
+        : null;
+    final iconColor = (done || isCurrent) ? Colors.white : AppColors.inkFaint;
+
+    return SizedBox(
+      width: 52,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: isCurrent && !done ? AppColors.surface : dotColor,
+              shape: BoxShape.circle,
+              border: dotBorder,
+            ),
+            child: done
+                ? Icon(Icons.check_rounded, size: 14, color: iconColor)
+                : isCurrent
+                    ? Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                      )
+                    : null,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTypography.labelSmall.copyWith(
+              fontSize: 10,
+              color: done || isCurrent ? AppColors.ink : AppColors.inkFaint,
+              fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+            ),
+          ),
+          Text(
+            sub,
+            textAlign: TextAlign.center,
+            style: AppTypography.bodySmall.copyWith(
+              fontSize: 9,
+              color: AppColors.inkFaint,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -78,8 +78,8 @@ class AuthRepository {
   UserModel _webFakeUser(String id) => UserModel(
         id: id,
         phone: '9999999999',
-        name: 'Demo Buyer',
-        email: '',
+        name: 'Arjun Reddy',
+        email: 'arjun.reddy@gmail.com',
         createdAt: DateTime.now().toIso8601String(),
       );
 }

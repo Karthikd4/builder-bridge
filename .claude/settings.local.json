@@ -21,7 +21,10 @@
       "Bash(taskkill /F /IM \"flutter.bat\")",
       "PowerShell(Get-Process *)",
       "Bash(flutter devices *)",
-      "Bash(flutter emulators *)"
+      "Bash(flutter emulators *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\dkart\\\\Documents\\\\Work\\\\Builder Bridge\\\\builder-bridge\\\\flutter-app\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(xargs -0 wc -l)"
     ]
   }
 }
