@@ -4,6 +4,7 @@ import 'package:builder_bridge/core/theme/app_colors.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
 import 'package:builder_bridge/core/widgets/bb_badge.dart';
+import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/features/documents/data/models/document_model.dart';
 
 class DocumentRow extends StatelessWidget {
@@ -71,13 +72,7 @@ class DocumentRow extends StatelessWidget {
         _              => null,
       };
 
-  String _formatDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${d.day.toString().padLeft(2, '0')} ${months[d.month - 1]} ${d.year}';
-  }
+  String _formatDate(DateTime d) => FormatUtils.formatDate(d);
 }
 
 class _DocIcon extends StatelessWidget {

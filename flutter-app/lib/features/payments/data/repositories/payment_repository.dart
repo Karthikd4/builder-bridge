@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 import 'package:builder_bridge/core/database/database_helper.dart';
+import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/features/payments/data/models/payment_milestone_model.dart';
 
 class PaymentRepository {
@@ -168,10 +169,5 @@ class PaymentRepository {
     return true;
   }
 
-  String _formatPaise(int paise) {
-    final r = paise / 100;
-    if (r >= 10000000) return '₹${(r / 10000000).toStringAsFixed(2)} Cr';
-    if (r >= 100000) return '₹${(r / 100000).toStringAsFixed(2)} L';
-    return '₹${r.toStringAsFixed(0)}';
-  }
+  String _formatPaise(int paise) => FormatUtils.formatPaise(paise);
 }

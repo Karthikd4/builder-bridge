@@ -11,6 +11,7 @@ abstract final class AppRoutes {
 
   static String towerFloor(int towerId) => '/inventory/tower/$towerId';
   static const estimate = '/estimate';
+  static const expressInterest = '/interest/confirm';
   static const bookingConfirm = '/booking/confirm';
   static const supportNew = '/support/new';
   static String supportDetail(int id) => '/support/$id';

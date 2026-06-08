@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 import 'package:builder_bridge/core/database/database_helper.dart';
+import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/features/booking/data/models/booking_model.dart';
 
 class BookingRepository {
@@ -145,12 +146,7 @@ class BookingRepository {
     });
   }
 
-  String _formatPaise(int paise) {
-    final r = paise / 100;
-    if (r >= 10000000) return '₹${(r / 10000000).toStringAsFixed(2)} Cr';
-    if (r >= 100000) return '₹${(r / 100000).toStringAsFixed(2)} L';
-    return '₹${r.toStringAsFixed(0)}';
-  }
+  String _formatPaise(int paise) => FormatUtils.formatPaise(paise);
 
   BookingModel _fromRow(Map<String, dynamic> row) => BookingModel(
         id: row['id'] as int,

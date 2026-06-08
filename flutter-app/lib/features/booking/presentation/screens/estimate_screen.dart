@@ -42,9 +42,9 @@ class EstimateScreen extends StatelessWidget {
           _DiscountNote(breakdown: breakdown),
           const SizedBox(height: AppSpacing.lg),
           BBButton(
-            label: 'Proceed to Book',
+            label: 'Express Interest',
             onPressed: () => context.push(
-              AppRoutes.bookingConfirm,
+              AppRoutes.expressInterest,
               extra: {'unit': unit, 'towerName': towerName},
             ),
           ),

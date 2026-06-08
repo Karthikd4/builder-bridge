@@ -4,6 +4,7 @@ import 'package:builder_bridge/core/theme/app_colors.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
 import 'package:builder_bridge/core/widgets/bb_badge.dart';
+import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/features/support/data/models/ticket_model.dart';
 
 class TicketRow extends StatelessWidget {
@@ -67,11 +68,5 @@ class TicketRow extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${d.day.toString().padLeft(2, '0')} ${months[d.month - 1]} ${d.year}';
-  }
+  String _formatDate(DateTime d) => FormatUtils.formatDate(d);
 }

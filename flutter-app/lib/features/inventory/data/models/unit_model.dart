@@ -16,6 +16,8 @@ abstract class UnitModel with _$UnitModel {
     @JsonKey(name: 'area_sqft') required double areaSqft,
     required String status,
     @JsonKey(name: 'base_price') required int basePrice,
+    // Populated via JOIN queries (e.g. getAllWithTowerName)
+    @JsonKey(name: 'tower_name') String? towerName,
   }) = _UnitModel;
 
   factory UnitModel.fromJson(Map<String, dynamic> json) =>

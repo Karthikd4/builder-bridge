@@ -10,6 +10,8 @@ import 'package:builder_bridge/core/widgets/bb_badge.dart';
 import 'package:builder_bridge/core/widgets/bb_button.dart';
 import 'package:builder_bridge/features/booking/data/models/booking_model.dart';
 import 'package:builder_bridge/features/booking/presentation/providers/booking_provider.dart';
+import 'package:builder_bridge/features/interests/data/models/interest_model.dart';
+import 'package:builder_bridge/features/interests/presentation/providers/interest_provider.dart';
 import 'package:builder_bridge/features/inventory/data/models/unit_model.dart';
 
 class UnitDetailSheet extends ConsumerWidget {
@@ -34,6 +36,7 @@ class UnitDetailSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final existingBookingAsync = ref.watch(currentUserBookingProvider);
+    final existingInterestAsync = ref.watch(currentUserInterestProvider);
 
     return Container(
       decoration: const BoxDecoration(
@@ -81,6 +84,7 @@ class UnitDetailSheet extends ConsumerWidget {
                     unit: unit,
                     towerName: towerName,
                     existingBooking: existingBookingAsync.valueOrNull,
+                    existingInterest: existingInterestAsync.valueOrNull,
                   ),
                 ],
               ),
@@ -110,22 +114,22 @@ class _ActionArea extends StatelessWidget {
   final UnitModel unit;
   final String towerName;
   final BookingModel? existingBooking;
+  final InterestModel? existingInterest;
 
   const _ActionArea({
     required this.unit,
     required this.towerName,
     required this.existingBooking,
+    required this.existingInterest,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 1. User already has an active booking → lock further bookings.
-    if (existingBooking != null) {
-      final isThisUnit = existingBooking!.unitId == unit.id;
+    // 1. User already expressed interest → prevent duplicate.
+    if (existingInterest != null) {
       return _LockedBanner(
-        message: isThisUnit
-            ? 'This is your booked unit.'
-            : 'You already have an active booking. One account = one unit.',
+        message: 'You\'ve already expressed interest in a unit. '
+            'Our team will be in touch soon.',
         onView: () {
           Navigator.of(context).pop();
           context.go(AppRoutes.dashboard);
@@ -133,7 +137,21 @@ class _ActionArea extends StatelessWidget {
       );
     }
 
-    // 2. Unit not available → disabled button with status label.
+    // 2. User has an active booking (seeded/admin-created) → lock.
+    if (existingBooking != null) {
+      final isThisUnit = existingBooking!.unitId == unit.id;
+      return _LockedBanner(
+        message: isThisUnit
+            ? 'This is your booked unit.'
+            : 'You already have an active booking.',
+        onView: () {
+          Navigator.of(context).pop();
+          context.go(AppRoutes.dashboard);
+        },
+      );
+    }
+
+    // 3. Unit not available → disabled button with status label.
     if (!unit.isAvailable) {
       return BBButton(
         label: _unavailableLabel,
@@ -142,7 +160,7 @@ class _ActionArea extends StatelessWidget {
       );
     }
 
-    // 3. User free, unit available → normal booking flow.
+    // 4. User free, unit available → express interest flow.
     return BBButton(
       label: 'Express Interest',
       onPressed: () {
@@ -194,7 +212,7 @@ class _LockedBanner extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         BBButton(
-          label: 'View My Booking',
+          label: 'View Dashboard',
           variant: BBButtonVariant.secondary,
           onPressed: onView,
         ),

@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:builder_bridge/core/database/migrations/migration_v1.dart';
+import 'package:builder_bridge/core/database/migrations/migration_v2.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -30,7 +31,7 @@ class DatabaseHelper {
         : join(await getDatabasesPath(), 'builderbridge.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
@@ -47,7 +48,13 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Future migrations added here by version increment only
+    if (oldVersion < 2) {
+      final batch = db.batch();
+      for (final statement in MigrationV2.statements) {
+        batch.execute(statement);
+      }
+      await batch.commit();
+    }
   }
 
   Future<void> _seedIfEmpty(Database db) async {

@@ -17,6 +17,7 @@ import 'package:builder_bridge/features/inventory/presentation/screens/tower_flo
 import 'package:builder_bridge/features/payments/presentation/screens/payments_screen.dart';
 import 'package:builder_bridge/features/booking/presentation/screens/booking_confirm_screen.dart';
 import 'package:builder_bridge/features/booking/presentation/screens/estimate_screen.dart';
+import 'package:builder_bridge/features/interests/presentation/screens/express_interest_screen.dart';
 import 'package:builder_bridge/features/inventory/data/models/unit_model.dart';
 import 'package:builder_bridge/features/support/presentation/screens/create_ticket_screen.dart';
 import 'package:builder_bridge/features/support/presentation/screens/support_screen.dart';
@@ -66,6 +67,16 @@ GoRouter appRouter(Ref ref) {
         builder: (_, state) {
           final extra = state.extra as Map<String, dynamic>;
           return EstimateScreen(
+            unit: extra['unit'] as UnitModel,
+            towerName: extra['towerName'] as String,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.expressInterest,
+        builder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return ExpressInterestScreen(
             unit: extra['unit'] as UnitModel,
             towerName: extra['towerName'] as String,
           );

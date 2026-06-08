@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:builder_bridge/core/navigation/app_routes.dart';
 import 'package:builder_bridge/core/theme/app_colors.dart';
+import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
 import 'package:builder_bridge/core/widgets/bb_button.dart';
@@ -231,11 +232,7 @@ class _PaymentInfoCard extends StatelessWidget {
     );
   }
 
-  String _formatPaise(int paise) {
-    final r = paise / 100;
-    if (r >= 10000000) return '₹${(r / 10000000).toStringAsFixed(2)} Cr';
-    return '₹${(r / 100000).toStringAsFixed(2)} L';
-  }
+  String _formatPaise(int paise) => FormatUtils.formatPaise(paise);
 }
 
 class _SummaryRow extends StatelessWidget {

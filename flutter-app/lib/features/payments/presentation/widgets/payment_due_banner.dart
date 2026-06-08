@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:builder_bridge/core/theme/app_colors.dart';
 import 'package:builder_bridge/core/theme/app_spacing.dart';
 import 'package:builder_bridge/core/theme/app_typography.dart';
-import 'package:builder_bridge/core/widgets/bb_button.dart';
 import 'package:builder_bridge/features/payments/data/models/payment_milestone_model.dart';
 
 class PaymentDueBanner extends StatelessWidget {
   final PaymentMilestoneModel milestone;
-  final VoidCallback? onPay;
 
   const PaymentDueBanner({
     required this.milestone,
-    this.onPay,
     super.key,
   });
 
@@ -56,13 +53,16 @@ class PaymentDueBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(milestone.formattedAmount,
                     style: AppTypography.bodySmall),
+                const SizedBox(height: 4),
+                Text(
+                  'Pay via cheque / NEFT — contact your RM',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: tone,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ],
             ),
-          ),
-          BBButton(
-            label: 'Pay',
-            fullWidth: false,
-            onPressed: onPay,
           ),
         ],
       ),

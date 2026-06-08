@@ -40,7 +40,7 @@ class PaymentsScreen extends ConsumerWidget {
           if (summary == null) {
             return BBEmptyState(
               icon: Icons.receipt_long_outlined,
-              message: 'Book a unit to view your payment schedule.',
+              message: 'Express interest in a unit to view your payment schedule.',
               ctaLabel: 'Browse Inventory',
               onCta: () => context.go(AppRoutes.inventory),
             );
@@ -52,14 +52,13 @@ class PaymentsScreen extends ConsumerWidget {
   }
 }
 
-class _PaymentsBody extends ConsumerWidget {
+class _PaymentsBody extends StatelessWidget {
   final PaymentSummary summary;
   const _PaymentsBody({required this.summary});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final nextDue = summary.nextDue;
-    final isPaying = ref.watch(milestonePaymentNotifierProvider) is AsyncLoading;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return ListView(
@@ -75,16 +74,13 @@ class _PaymentsBody extends ConsumerWidget {
           eyebrow: 'PAYMENT SCHEDULE',
           title: '${summary.totalCount} milestones',
         ),
+        const SizedBox(height: AppSpacing.sm),
+        _PaymentInfoNote(),
         const SizedBox(height: AppSpacing.md),
         PaymentSummaryCard(summary: summary),
         if (nextDue != null) ...[
           const SizedBox(height: AppSpacing.md),
-          PaymentDueBanner(
-            milestone: nextDue,
-            onPay: isPaying
-                ? null
-                : () => _confirmPay(context, ref, nextDue.id, nextDue.label),
-          ),
+          PaymentDueBanner(milestone: nextDue),
         ],
         const SizedBox(height: AppSpacing.lg),
         const _SectionHeader(eyebrow: 'ALL MILESTONES'),
@@ -111,35 +107,31 @@ class _PaymentsBody extends ConsumerWidget {
       ],
     );
   }
+}
 
-  void _confirmPay(
-      BuildContext context, WidgetRef ref, int milestoneId, String label) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Payment'),
-        content: Text('Mark "$label" as paid?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await ref
-                  .read(milestonePaymentNotifierProvider.notifier)
-                  .markPaid(milestoneId);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('$label marked as paid'),
-                    backgroundColor: AppColors.ok,
-                  ),
-                );
-              }
-            },
-            child: const Text('Confirm'),
+class _PaymentInfoNote extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.accentSoft,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.accent.withAlpha(60)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline_rounded,
+              size: 18, color: AppColors.accent),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Payments are processed via cheque or NEFT. '
+              'Contact your relationship manager to make a payment.',
+              style:
+                  AppTypography.bodySmall.copyWith(color: AppColors.ink),
+            ),
           ),
         ],
       ),

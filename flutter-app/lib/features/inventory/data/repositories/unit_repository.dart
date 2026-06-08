@@ -28,4 +28,25 @@ class UnitRepository {
     );
     return {for (final r in rows) r['status'] as String: r['cnt'] as int};
   }
+
+  Future<List<UnitModel>> getAllWithTowerName() async {
+    final db = await DatabaseHelper().database;
+    final rows = await db.rawQuery('''
+      SELECT u.*, t.name AS tower_name
+      FROM units u
+      JOIN towers t ON u.tower_id = t.id
+      ORDER BY t.name, u.floor ASC, u.unit_no ASC
+    ''');
+    return rows.map((r) => UnitModel.fromJson(Map<String, dynamic>.from(r))).toList();
+  }
+
+  Future<void> updateStatus(int unitId, String status) async {
+    final db = await DatabaseHelper().database;
+    await db.update(
+      'units',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [unitId],
+    );
+  }
 }
