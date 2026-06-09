@@ -1,0 +1,15 @@
+# Large archives — never commit
+*.zip
+*.tar.gz
+*.tar
+
+# Flutter build outputs
+flutter-app/build/
+flutter-app/.dart_tool/
+flutter-app/.flutter-plugins
+flutter-app/.flutter-plugins-dependencies
+
+# IDE
+.idea/
+*.iml
+.vscode/
