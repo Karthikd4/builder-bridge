@@ -25,7 +25,16 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\dkart\\\\Documents\\\\Work\\\\Builder Bridge\\\\builder-bridge\\\\flutter-app\" -Recurse -Directory)",
       "Bash(Select-Object FullName)",
       "Bash(xargs -0 wc -l)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(git filter-branch *)",
+      "Bash(git stash *)",
+      "Bash(set FILTER_BRANCH_SQUELCH_WARNING=1)",
+      "Bash(git update-ref *)",
+      "Bash(git reflog *)",
+      "Bash(git gc *)",
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
