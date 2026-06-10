@@ -6,7 +6,7 @@ class SupportRepository {
   final _db = DatabaseHelper();
 
   Future<List<TicketModel>> getForUser(int userId) async {
-    final db = await _db.database;
+    final db = _db;
     final rows = await db.query(
       'tickets',
       where: 'user_id = ?',
@@ -17,14 +17,14 @@ class SupportRepository {
   }
 
   Future<TicketModel?> getById(int id) async {
-    final db = await _db.database;
+    final db = _db;
     final rows = await db.query('tickets', where: 'id = ?', whereArgs: [id]);
     if (rows.isEmpty) return null;
     return TicketModel.fromJson(rows.first);
   }
 
   Future<List<TicketCommentModel>> getComments(int ticketId) async {
-    final db = await _db.database;
+    final db = _db;
     final rows = await db.query(
       'ticket_comments',
       where: 'ticket_id = ?',
@@ -40,7 +40,7 @@ class SupportRepository {
     required String title,
     required String description,
   }) async {
-    final db = await _db.database;
+    final db = _db;
     final now = DateTime.now().toIso8601String();
     final id = await db.insert('tickets', {
       'user_id': userId,
@@ -66,7 +66,7 @@ class SupportRepository {
     required String author,
     required String body,
   }) async {
-    final db = await _db.database;
+    final db = _db;
     await db.insert('ticket_comments', {
       'ticket_id': ticketId,
       'author': author,

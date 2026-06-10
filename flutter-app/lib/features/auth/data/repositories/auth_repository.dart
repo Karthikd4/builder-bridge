@@ -18,7 +18,7 @@ class AuthRepository {
 
     if (kIsWeb) return _webFakeUser(userId);
 
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.query('users', where: 'id = ?', whereArgs: [userId]);
     if (rows.isEmpty) return null;
     return _fromRow(rows.first);
@@ -33,7 +33,7 @@ class AuthRepository {
       return user;
     }
 
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.query('users', where: 'phone = ?', whereArgs: [phone]);
 
     late UserModel user;

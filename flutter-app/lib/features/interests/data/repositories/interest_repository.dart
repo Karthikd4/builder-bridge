@@ -21,8 +21,7 @@ class InterestRepository {
   ''';
 
   Future<InterestModel?> getLatestForUser(int userId) async {
-    final db = await _db.database;
-    final rows = await db.rawQuery(
+    final rows = await _db.rawQuery(
       '$_baseQuery WHERE i.user_id = ? ORDER BY i.created_at DESC LIMIT 1',
       [userId],
     );
@@ -34,8 +33,7 @@ class InterestRepository {
   /// TODO(backend): Replace with GET /interests API call so the builder portal
   /// can surface buyer interest data without relying on local SQLite.
   Future<List<InterestModel>> getAllInterests() async {
-    final db = await _db.database;
-    final rows = await db.rawQuery(
+    final rows = await _db.rawQuery(
       '$_baseQuery ORDER BY i.created_at DESC',
     );
     return rows
@@ -51,18 +49,17 @@ class InterestRepository {
     required int userId,
     required String unitNo,
   }) async {
-    final db = await _db.database;
     final now = DateTime.now().toIso8601String();
 
-    return db.transaction((txn) async {
-      final id = await txn.insert('interests', {
+    return _db.transaction(() async {
+      final id = await _db.insert('interests', {
         'unit_id': unitId,
         'user_id': userId,
         'status': InterestStatus.newInterest,
         'created_at': now,
       });
 
-      await txn.insert('notifications', {
+      await _db.insert('notifications', {
         'user_id': userId,
         'type': 'booking_confirmed',
         'title': 'Interest registered',
@@ -83,8 +80,7 @@ class InterestRepository {
   }
 
   Future<void> updateStatus(int interestId, String status) async {
-    final db = await _db.database;
-    await db.update(
+    await _db.update(
       'interests',
       {'status': status},
       where: 'id = ?',

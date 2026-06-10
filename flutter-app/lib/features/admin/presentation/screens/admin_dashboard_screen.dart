@@ -26,8 +26,8 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
       body: statsAsync.when(
         loading: () => const BBLoadingState(),
-        error: (_, __) => BBErrorState(
-          message: 'Could not load dashboard',
+        error: (err, st) => BBErrorState(
+          message: 'Error: $err',
           onRetry: () => ref.invalidate(adminDashboardStatsProvider),
         ),
         data: (stats) => _DashboardBody(stats: stats),

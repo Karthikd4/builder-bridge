@@ -10,9 +10,8 @@ class UserRepository {
     required String phone,
     String? email,
   }) async {
-    final db = await _db.database;
     final now = DateTime.now().toIso8601String();
-    return db.insert('users', {
+    return _db.insert('users', {
       'name': name,
       'phone': phone,
       'email': email,

@@ -1,5 +1,3 @@
-import 'package:sqflite/sqflite.dart';
-
 import 'package:builder_bridge/core/database/database_helper.dart';
 import 'package:builder_bridge/features/documents/data/models/document_model.dart';
 
@@ -7,8 +5,7 @@ class DocumentRepository {
   final _db = DatabaseHelper();
 
   Future<List<DocumentModel>> getForBooking(int bookingId) async {
-    final db = await _db.database;
-    final rows = await db.query(
+    final rows = await _db.query(
       'documents',
       where: 'booking_id = ?',
       whereArgs: [bookingId],
@@ -18,8 +15,7 @@ class DocumentRepository {
   }
 
   Future<DocumentModel?> getById(int id) async {
-    final db = await _db.database;
-    final rows = await db.query('documents', where: 'id = ?', whereArgs: [id]);
+    final rows = await _db.query('documents', where: 'id = ?', whereArgs: [id]);
     if (rows.isEmpty) return null;
     return DocumentModel.fromJson(rows.first);
   }
@@ -31,25 +27,23 @@ class DocumentRepository {
     required int bookingId,
     required String unitNo,
   }) async {
-    final db = await _db.database;
-    final existing = Sqflite.firstIntValue(await db.rawQuery(
-            'SELECT COUNT(*) FROM documents WHERE booking_id = ?',
-            [bookingId])) ??
-        0;
+    final rows = await _db.rawQuery(
+      'SELECT COUNT(*) FROM documents WHERE booking_id = ?', [bookingId]);
+    final existing = rows.first.values.first as int? ?? 0;
     if (existing > 0) return false;
 
     final now = DateTime.now().toIso8601String();
     final docs = <(String, String, String)>[
-      ('Agreement',  'Booking Confirmation Letter.pdf',          'signed'),
-      ('Agreement',  'Agreement of Sale — Draft v1.pdf',         'under_review'),
-      ('Plans',      'Unit $unitNo — Floor plan.pdf',            'ready'),
-      ('Plans',      'The Vue Residences — Master layout.pdf',     'ready'),
-      ('Compliance', 'RERA Certificate — P02400006789.pdf',      'ready'),
-      ('Compliance', 'Title deed — Survey 138/2.pdf',            'ready'),
+      ('Agreement',  'Booking Confirmation Letter.pdf',       'signed'),
+      ('Agreement',  'Agreement of Sale — Draft v1.pdf',      'under_review'),
+      ('Plans',      'Unit $unitNo — Floor plan.pdf',         'ready'),
+      ('Plans',      'The Vue Residences — Master layout.pdf', 'ready'),
+      ('Compliance', 'RERA Certificate — P02400006789.pdf',   'ready'),
+      ('Compliance', 'Title deed — Survey 138/2.pdf',         'ready'),
     ];
-    await db.transaction((txn) async {
+    await _db.transaction(() async {
       for (final (type, name, status) in docs) {
-        await txn.insert('documents', {
+        await _db.insert('documents', {
           'booking_id': bookingId,
           'type': type,
           'name': name,

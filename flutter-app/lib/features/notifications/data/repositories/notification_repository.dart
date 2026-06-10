@@ -5,7 +5,7 @@ class NotificationRepository {
   final _db = DatabaseHelper();
 
   Future<List<NotificationModel>> getForUser(int userId) async {
-    final db = await _db.database;
+    final db = _db;
     final rows = await db.query(
       'notifications',
       where: 'user_id = ?',
@@ -16,7 +16,7 @@ class NotificationRepository {
   }
 
   Future<int> unreadCount(int userId) async {
-    final db = await _db.database;
+    final db = _db;
     final rows = await db.rawQuery(
       'SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL',
       [userId],
@@ -25,7 +25,7 @@ class NotificationRepository {
   }
 
   Future<void> markRead(int id) async {
-    final db = await _db.database;
+    final db = _db;
     await db.update(
       'notifications',
       {'read_at': DateTime.now().toIso8601String()},
@@ -35,7 +35,7 @@ class NotificationRepository {
   }
 
   Future<void> markAllRead(int userId) async {
-    final db = await _db.database;
+    final db = _db;
     await db.update(
       'notifications',
       {'read_at': DateTime.now().toIso8601String()},

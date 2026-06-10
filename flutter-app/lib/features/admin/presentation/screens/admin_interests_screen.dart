@@ -31,8 +31,8 @@ class AdminInterestsScreen extends ConsumerWidget {
       ),
       body: interestsAsync.when(
         loading: () => const BBLoadingState(),
-        error: (_, __) => BBErrorState(
-          message: 'Could not load interests',
+        error: (err, st) => BBErrorState(
+          message: 'Error: $err',
           onRetry: () => ref.invalidate(allInterestsProvider),
         ),
         data: (interests) {

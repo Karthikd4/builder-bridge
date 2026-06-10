@@ -1,121 +1,159 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 
-import 'package:builder_bridge/core/database/migrations/migration_v1.dart';
-import 'package:builder_bridge/core/database/migrations/migration_v2.dart';
+import 'package:builder_bridge/core/database/app_database.dart';
 
+/// Thin facade over [AppDatabase] that exposes a sqflite-compatible surface
+/// so repositories require minimal changes after the sqflite → Drift migration.
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
   DatabaseHelper._internal();
 
-  static Database? _db;
-
-  Future<Database> get database async {
-    _db ??= await _initDatabase();
-    return _db!;
-  }
+  late final AppDatabase _appDb;
 
   Future<void> init() async {
-    final db = await database;
-    await _seedIfEmpty(db);
+    _appDb = AppDatabase();
+    // First access triggers onCreate / onUpgrade migration callbacks.
+    await _appDb.customSelect('SELECT 1').get();
+    await _seedIfEmpty();
   }
 
-  Future<Database> _initDatabase() async {
-    final path = kIsWeb
-        ? 'builderbridge.db'
-        : join(await getDatabasesPath(), 'builderbridge.db');
-    return openDatabase(
-      path,
-      version: 2,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-      onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
+  // ── sqflite-compatible query surface ──────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> query(
+    String table, {
+    String? where,
+    List<Object?>? whereArgs,
+    String? orderBy,
+    int? limit,
+  }) {
+    var sql = 'SELECT * FROM $table';
+    if (where != null) sql += ' WHERE $where';
+    if (orderBy != null) sql += ' ORDER BY $orderBy';
+    if (limit != null) sql += ' LIMIT $limit';
+    return _select(sql, whereArgs ?? []);
+  }
+
+  Future<List<Map<String, dynamic>>> rawQuery(
+    String sql, [
+    List<Object?>? args,
+  ]) =>
+      _select(sql, args ?? []);
+
+  /// Inserts [values] into [table]. Returns the last inserted row ID.
+  Future<int> insert(String table, Map<String, dynamic> values) {
+    final cols = values.keys.join(', ');
+    final placeholders = List.filled(values.length, '?').join(', ');
+    return _appDb.customInsert(
+      'INSERT INTO $table ($cols) VALUES ($placeholders)',
+      variables: _vars(values.values.toList()),
     );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    final batch = db.batch();
-    for (final statement in MigrationV1.statements) {
-      batch.execute(statement);
-    }
-    await batch.commit();
-    await _seedIfEmpty(db);
+  Future<int> update(
+    String table,
+    Map<String, dynamic> values, {
+    String? where,
+    List<Object?>? whereArgs,
+  }) {
+    final sets = values.keys.map((k) => '$k = ?').join(', ');
+    var sql = 'UPDATE $table SET $sets';
+    if (where != null) sql += ' WHERE $where';
+    final vars = [
+      ..._vars(values.values.toList()),
+      ..._vars(whereArgs ?? []),
+    ];
+    return _appDb.customUpdate(
+      sql,
+      variables: vars,
+      updateKind: UpdateKind.update,
+    );
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      final batch = db.batch();
-      for (final statement in MigrationV2.statements) {
-        batch.execute(statement);
-      }
-      await batch.commit();
-    }
-  }
+  /// Runs [action] inside a database transaction.
+  /// All [insert]/[update]/[query]/[rawQuery] calls within [action]
+  /// automatically participate in the transaction via Drift's ambient context.
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      _appDb.transaction(action);
 
-  Future<void> _seedIfEmpty(Database db) async {
-    final count = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM projects')) ??
-        0;
+  Future<void> close() => _appDb.close();
+
+  // ── Seeding ───────────────────────────────────────────────────────────────
+
+  Future<void> _seedIfEmpty() async {
+    final rows = await rawQuery('SELECT COUNT(*) FROM projects');
+    final count = rows.first.values.first as int? ?? 0;
     if (count > 0) return;
-
     try {
       final jsonStr = await rootBundle.loadString('assets/seed/seed_data.json');
-      await SeedLoader(db).load(jsonStr);
-    } catch (_) {
-      // Seed file not present — skip silently
-    }
+      await _SeedLoader(this).load(jsonStr);
+    } catch (_) {}
   }
 
-  Future<void> close() async {
-    await _db?.close();
-    _db = null;
-  }
+  // ── Internals ─────────────────────────────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> _select(
+    String sql,
+    List<Object?> args,
+  ) async =>
+      (await _appDb.customSelect(sql, variables: _vars(args)).get())
+          .map((r) => r.data)
+          .toList();
+
+  static List<Variable<Object>> _vars(List<Object?> args) =>
+      args.map((a) => Variable(a)).toList();
 }
 
-class SeedLoader {
-  final Database db;
-  SeedLoader(this.db);
+class _SeedLoader {
+  final DatabaseHelper _db;
+  _SeedLoader(this._db);
 
   Future<void> load(String jsonStr) async {
     final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-    const ignore = ConflictAlgorithm.ignore;
-
-    await db.transaction((txn) async {
+    await _db.transaction(() async {
       for (final p in (data['projects'] as List<dynamic>)) {
-        await txn.insert('projects', Map<String, dynamic>.from(p as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('projects', p as Map);
       }
       for (final t in (data['towers'] as List<dynamic>)) {
-        await txn.insert('towers', Map<String, dynamic>.from(t as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('towers', t as Map);
       }
       for (final u in (data['units'] as List<dynamic>)) {
-        await txn.insert('units', Map<String, dynamic>.from(u as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('units', u as Map);
       }
       for (final u in (data['users'] as List<dynamic>? ?? [])) {
-        await txn.insert('users', Map<String, dynamic>.from(u as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('users', u as Map);
       }
       for (final b in (data['bookings'] as List<dynamic>? ?? [])) {
-        await txn.insert('bookings', Map<String, dynamic>.from(b as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('bookings', b as Map);
       }
       for (final m in (data['payment_milestones'] as List<dynamic>? ?? [])) {
-        await txn.insert('payment_milestones', Map<String, dynamic>.from(m as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('payment_milestones', m as Map);
       }
       for (final d in (data['documents'] as List<dynamic>? ?? [])) {
-        await txn.insert('documents', Map<String, dynamic>.from(d as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('documents', d as Map);
       }
       for (final t in (data['tickets'] as List<dynamic>? ?? [])) {
-        await txn.insert('tickets', Map<String, dynamic>.from(t as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('tickets', t as Map);
       }
       for (final c in (data['ticket_comments'] as List<dynamic>? ?? [])) {
-        await txn.insert('ticket_comments', Map<String, dynamic>.from(c as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('ticket_comments', c as Map);
       }
       for (final n in (data['notifications'] as List<dynamic>? ?? [])) {
-        await txn.insert('notifications', Map<String, dynamic>.from(n as Map), conflictAlgorithm: ignore);
+        await _insertIgnore('notifications', n as Map);
       }
     });
+  }
+
+  Future<void> _insertIgnore(String table, Map values) async {
+    final row = Map<String, dynamic>.from(values);
+    final cols = row.keys.join(', ');
+    final placeholders = List.filled(row.length, '?').join(', ');
+    await _db._appDb.customInsert(
+      'INSERT OR IGNORE INTO $table ($cols) VALUES ($placeholders)',
+      variables: DatabaseHelper._vars(row.values.toList()),
+    );
   }
 }

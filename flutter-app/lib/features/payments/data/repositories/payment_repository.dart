@@ -1,5 +1,3 @@
-import 'package:sqflite/sqflite.dart';
-
 import 'package:builder_bridge/core/database/database_helper.dart';
 import 'package:builder_bridge/core/utils/format_utils.dart';
 import 'package:builder_bridge/features/payments/data/models/payment_milestone_model.dart';
@@ -8,8 +6,7 @@ class PaymentRepository {
   final _db = DatabaseHelper();
 
   Future<List<PaymentMilestoneModel>> getForBooking(int bookingId) async {
-    final db = await _db.database;
-    final rows = await db.query(
+    final rows = await _db.query(
       'payment_milestones',
       where: 'booking_id = ?',
       whereArgs: [bookingId],
@@ -25,12 +22,11 @@ class PaymentRepository {
   /// - inserts a "Payment received" notification for the user
   /// - if status crossed to confirmed/completed, inserts a status notification
   Future<void> markPaid(int milestoneId) async {
-    final db = await _db.database;
     final paidAt = DateTime.now().toIso8601String();
 
-    await db.transaction((txn) async {
+    await _db.transaction(() async {
       // 1. Mark the milestone paid
-      await txn.update(
+      await _db.update(
         'payment_milestones',
         {'paid_at': paidAt},
         where: 'id = ?',
@@ -38,7 +34,7 @@ class PaymentRepository {
       );
 
       // 2. Look up milestone details
-      final milestoneRows = await txn.query(
+      final milestoneRows = await _db.query(
         'payment_milestones',
         where: 'id = ?',
         whereArgs: [milestoneId],
@@ -50,15 +46,15 @@ class PaymentRepository {
       final amount = milestone['amount'] as int;
 
       // 3. Look up booking
-      final bookingRows = await txn
-          .query('bookings', where: 'id = ?', whereArgs: [bookingId]);
+      final bookingRows = await _db.query(
+          'bookings', where: 'id = ?', whereArgs: [bookingId]);
       if (bookingRows.isEmpty) return;
       final booking = bookingRows.first;
       final userId = booking['user_id'] as int;
       final currentStatus = booking['status'] as String;
 
       // 4. Compute new status from milestone progress
-      final allRows = await txn.query(
+      final allRows = await _db.query(
         'payment_milestones',
         where: 'booking_id = ?',
         whereArgs: [bookingId],
@@ -79,7 +75,7 @@ class PaymentRepository {
       final statusChanged = newStatus != currentStatus;
 
       if (statusChanged) {
-        await txn.update(
+        await _db.update(
           'bookings',
           {'status': newStatus},
           where: 'id = ?',
@@ -90,7 +86,7 @@ class PaymentRepository {
       final formattedAmount = _formatPaise(amount);
 
       // 5. Insert receipt document
-      await txn.insert('documents', {
+      await _db.insert('documents', {
         'booking_id': bookingId,
         'type': 'Receipts',
         'name': 'Receipt — $label $formattedAmount.pdf',
@@ -100,7 +96,7 @@ class PaymentRepository {
       });
 
       // 6. Payment-received notification
-      await txn.insert('notifications', {
+      await _db.insert('notifications', {
         'user_id': userId,
         'type': 'payment_due',
         'title': 'Payment received',
@@ -111,7 +107,7 @@ class PaymentRepository {
 
       // 7. Status transition notification
       if (statusChanged && newStatus == 'completed') {
-        await txn.insert('notifications', {
+        await _db.insert('notifications', {
           'user_id': userId,
           'type': 'booking_confirmed',
           'title': 'All payments complete!',
@@ -120,7 +116,7 @@ class PaymentRepository {
           'created_at': paidAt,
         });
       } else if (statusChanged && newStatus == 'confirmed') {
-        await txn.insert('notifications', {
+        await _db.insert('notifications', {
           'user_id': userId,
           'type': 'booking_confirmed',
           'title': 'Booking confirmed',
@@ -139,25 +135,25 @@ class PaymentRepository {
     required int totalPaise,
     required String bookedAt,
   }) async {
-    final db = await _db.database;
-    final existing = Sqflite.firstIntValue(await db.rawQuery(
-            'SELECT COUNT(*) FROM payment_milestones WHERE booking_id = ?',
-            [bookingId])) ??
-        0;
+    final rows = await _db.rawQuery(
+      'SELECT COUNT(*) FROM payment_milestones WHERE booking_id = ?',
+      [bookingId],
+    );
+    final existing = rows.first.values.first as int? ?? 0;
     if (existing > 0) return false;
 
     final dt = DateTime.parse(bookedAt);
     final schedule = <(String, int, int, String?)>[
-      ('Token Amount',      (totalPaise * 0.05).round(), 0,   bookedAt),
-      ('On Agreement',      (totalPaise * 0.15).round(), 30,  null),
-      ('On Foundation',     (totalPaise * 0.20).round(), 120, null),
-      ('On Slab — 5th Flr', (totalPaise * 0.20).round(), 240, null),
-      ('On Completion',     (totalPaise * 0.40).round(), 540, null),
+      ('Token Amount',       (totalPaise * 0.05).round(), 0,   bookedAt),
+      ('On Agreement',       (totalPaise * 0.15).round(), 30,  null),
+      ('On Foundation',      (totalPaise * 0.20).round(), 120, null),
+      ('On Slab — 5th Flr',  (totalPaise * 0.20).round(), 240, null),
+      ('On Completion',      (totalPaise * 0.40).round(), 540, null),
     ];
 
-    await db.transaction((txn) async {
+    await _db.transaction(() async {
       for (final (label, amount, daysOffset, paidAt) in schedule) {
-        await txn.insert('payment_milestones', {
+        await _db.insert('payment_milestones', {
           'booking_id': bookingId,
           'label': label,
           'amount': amount,

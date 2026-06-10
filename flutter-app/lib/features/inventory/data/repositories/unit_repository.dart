@@ -3,7 +3,7 @@ import 'package:builder_bridge/features/inventory/data/models/unit_model.dart';
 
 class UnitRepository {
   Future<List<UnitModel>> getUnitsForTower(int towerId) async {
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.query(
       'units',
       where: 'tower_id = ?',
@@ -14,14 +14,14 @@ class UnitRepository {
   }
 
   Future<UnitModel?> getById(int id) async {
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.query('units', where: 'id = ?', whereArgs: [id]);
     if (rows.isEmpty) return null;
     return UnitModel.fromJson(rows.first);
   }
 
   Future<Map<String, int>> getStatusCountsForTower(int towerId) async {
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.rawQuery(
       'SELECT status, COUNT(*) as cnt FROM units WHERE tower_id = ? GROUP BY status',
       [towerId],
@@ -30,7 +30,7 @@ class UnitRepository {
   }
 
   Future<List<UnitModel>> getAllWithTowerName() async {
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     final rows = await db.rawQuery('''
       SELECT u.*, t.name AS tower_name
       FROM units u
@@ -41,7 +41,7 @@ class UnitRepository {
   }
 
   Future<void> updateStatus(int unitId, String status) async {
-    final db = await DatabaseHelper().database;
+    final db = DatabaseHelper();
     await db.update(
       'units',
       {'status': status},
