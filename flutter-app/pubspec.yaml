@@ -70,5 +70,4 @@ flutter:
   assets:
     - assets/seed/
     - assets/images/
-
-  # Fonts served via google_fonts package — no local font files needed
+    - google_fonts/

@@ -84,9 +84,6 @@ class DatabaseHelper {
   // ── Seeding ───────────────────────────────────────────────────────────────
 
   Future<void> _seedIfEmpty() async {
-    final rows = await rawQuery('SELECT COUNT(*) FROM projects');
-    final count = rows.first.values.first as int? ?? 0;
-    if (count > 0) return;
     try {
       final jsonStr = await rootBundle.loadString('assets/seed/seed_data.json');
       await _SeedLoader(this).load(jsonStr);
@@ -143,6 +140,9 @@ class _SeedLoader {
       }
       for (final n in (data['notifications'] as List<dynamic>? ?? [])) {
         await _insertIgnore('notifications', n as Map);
+      }
+      for (final a in (data['admin_users'] as List<dynamic>? ?? [])) {
+        await _insertIgnore('admin_users', a as Map);
       }
     });
   }

@@ -89,37 +89,26 @@
     { "id": 72, "tower_id": 2, "floor": 8,  "unit_no": "804",  "type": "4BHK", "area_sqft": 1850.0, "status": "available", "base_price": 1924000000 }
   ],
   "users": [
-    {
-      "id": 1,
-      "phone": "9999999999",
-      "name": "Arjun Reddy",
-      "email": "arjun.reddy@gmail.com",
-      "created_at": "2026-01-15T10:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "phone": "9000000001",
-      "name": "Priya Nair",
-      "email": "priya.nair@gmail.com",
-      "created_at": "2026-05-01T10:00:00.000Z"
-    },
-    {
-      "id": 3,
-      "phone": "9000000002",
-      "name": "Vikram Mehta",
-      "email": "vikram.mehta@gmail.com",
-      "created_at": "2026-05-01T10:00:00.000Z"
-    }
+    { "id": 1, "phone": "9999999999", "name": "Arjun Reddy", "email": "arjun.reddy@gmail.com", "created_at": "2026-01-15T10:00:00.000Z" },
+    { "id": 2, "phone": "9000000001", "name": "Priya Nair", "email": "priya.nair@gmail.com", "created_at": "2026-05-01T10:00:00.000Z" },
+    { "id": 3, "phone": "9000000002", "name": "Vikram Mehta", "email": "vikram.mehta@gmail.com", "created_at": "2026-05-01T10:00:00.000Z" },
+    { "id": 4, "phone": "9000000003", "name": "Sneha Sharma", "email": "sneha.sharma@gmail.com", "created_at": "2026-04-10T10:00:00.000Z" },
+    { "id": 5, "phone": "9000000004", "name": "Ravi Kumar", "email": "ravi.kumar@gmail.com", "created_at": "2026-03-20T10:00:00.000Z" },
+    { "id": 6, "phone": "9000000005", "name": "Lakshmi Devi", "email": "lakshmi.d@gmail.com", "created_at": "2026-04-25T10:00:00.000Z" },
+    { "id": 7, "phone": "9000000006", "name": "Suresh Babu", "email": "suresh.babu@gmail.com", "created_at": "2026-05-05T10:00:00.000Z" },
+    { "id": 8, "phone": "9000000007", "name": "Anita Desai", "email": "anita.desai@gmail.com", "created_at": "2026-05-10T10:00:00.000Z" },
+    { "id": 9, "phone": "9000000008", "name": "Karthik Rao", "email": "karthik.rao@gmail.com", "created_at": "2026-05-15T10:00:00.000Z" },
+    { "id": 10, "phone": "9000000009", "name": "Deepa Menon", "email": "deepa.menon@gmail.com", "created_at": "2026-05-20T10:00:00.000Z" }
   ],
   "bookings": [
-    {
-      "id": 1,
-      "unit_id": 9,
-      "user_id": 1,
-      "status": "confirmed",
-      "token_amount": 54063250,
-      "booked_at": "2026-05-03T10:00:00.000Z"
-    }
+    { "id": 1, "unit_id": 9,  "user_id": 1, "status": "confirmed",  "token_amount": 54063250,  "booked_at": "2026-05-03T10:00:00.000Z" },
+    { "id": 2, "unit_id": 4,  "user_id": 4, "status": "confirmed",  "token_amount": 83250000,  "booked_at": "2026-04-15T10:00:00.000Z" },
+    { "id": 3, "unit_id": 6,  "user_id": 5, "status": "confirmed",  "token_amount": 55000000,  "booked_at": "2026-03-25T10:00:00.000Z" },
+    { "id": 4, "unit_id": 7,  "user_id": 6, "status": "reserved",   "token_amount": 53125000,  "booked_at": "2026-05-01T10:00:00.000Z" },
+    { "id": 5, "unit_id": 8,  "user_id": 7, "status": "reserved",   "token_amount": 85100000,  "booked_at": "2026-05-08T10:00:00.000Z" },
+    { "id": 6, "unit_id": 10, "user_id": 8, "status": "reserved",   "token_amount": 55937500,  "booked_at": "2026-05-12T10:00:00.000Z" },
+    { "id": 7, "unit_id": 13, "user_id": 9, "status": "cancelled",  "token_amount": 43225000,  "booked_at": "2026-05-18T10:00:00.000Z" },
+    { "id": 8, "unit_id": 11, "user_id": 10, "status": "cancelled", "token_amount": 53750000,  "booked_at": "2026-05-22T10:00:00.000Z" }
   ],
   "payment_milestones": [
     { "id": 1, "booking_id": 1, "label": "Booking token",        "amount": 54063250,  "due_date": "2026-05-03T00:00:00.000Z", "paid_at": "2026-05-03T11:00:00.000Z" },
@@ -217,5 +206,15 @@
       "read_at": "2026-05-03T12:00:00.000Z",
       "created_at": "2026-05-03T11:00:00.000Z"
     }
+  ],
+  "admin_users": [
+    { "id": 1, "name": "Raghuram Pradeep",  "email": "raghuram@vueconstructions.in",  "phone": "9876500001", "role": "owner",   "is_active": 1, "created_at": "2025-06-01T09:00:00.000Z" },
+    { "id": 2, "name": "Sai Krishna",       "email": "sai@vueconstructions.in",       "phone": "9876500002", "role": "manager", "is_active": 1, "created_at": "2025-07-15T10:00:00.000Z" },
+    { "id": 3, "name": "Priya Reddy",       "email": "priya@vueconstructions.in",     "phone": "9876500003", "role": "sales",   "is_active": 1, "created_at": "2025-08-01T11:00:00.000Z" },
+    { "id": 4, "name": "Vikram Sharma",     "email": "vikram@vueconstructions.in",    "phone": "9876500004", "role": "sales",   "is_active": 1, "created_at": "2025-09-10T09:30:00.000Z" },
+    { "id": 5, "name": "Meena Kumari",      "email": "meena@vueconstructions.in",     "phone": "9876500005", "role": "manager", "is_active": 1, "created_at": "2025-10-05T14:00:00.000Z" },
+    { "id": 6, "name": "Rajesh Gupta",      "email": "rajesh@vueconstructions.in",    "phone": "9876500006", "role": "viewer",  "is_active": 1, "created_at": "2025-11-20T12:00:00.000Z" },
+    { "id": 7, "name": "Ananya Iyer",       "email": "ananya@vueconstructions.in",    "phone": "9876500007", "role": "sales",   "is_active": 0, "created_at": "2025-12-01T10:00:00.000Z" },
+    { "id": 8, "name": "Sunil Varma",       "email": "sunil@vueconstructions.in",     "phone": "9876500008", "role": "viewer",  "is_active": 0, "created_at": "2026-01-15T09:00:00.000Z" }
   ]
 }

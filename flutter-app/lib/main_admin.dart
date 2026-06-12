@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:builder_bridge/core/database/database_helper.dart';
 import 'package:builder_bridge/core/theme/app_theme.dart';
+import 'package:builder_bridge/features/admin/presentation/screens/admin_login_screen.dart';
 import 'package:builder_bridge/features/admin/presentation/screens/admin_shell.dart';
 
 Future<void> main() async {
@@ -19,8 +20,15 @@ Future<void> main() async {
   runApp(const ProviderScope(child: BuilderBridgeAdminApp()));
 }
 
-class BuilderBridgeAdminApp extends StatelessWidget {
+class BuilderBridgeAdminApp extends StatefulWidget {
   const BuilderBridgeAdminApp({super.key});
+
+  @override
+  State<BuilderBridgeAdminApp> createState() => _BuilderBridgeAdminAppState();
+}
+
+class _BuilderBridgeAdminAppState extends State<BuilderBridgeAdminApp> {
+  bool _authenticated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +36,14 @@ class BuilderBridgeAdminApp extends StatelessWidget {
       title: 'BuilderBridge Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const AdminShell(),
+      home: _authenticated
+          ? AdminShell(
+              onLogout: () => setState(() => _authenticated = false),
+            )
+          : AdminLoginScreen(
+              onLoginSuccess: () =>
+                  setState(() => _authenticated = true),
+            ),
     );
   }
 }

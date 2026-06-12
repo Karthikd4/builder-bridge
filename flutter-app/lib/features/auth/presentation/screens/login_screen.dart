@@ -86,7 +86,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               top: AppSpacing.sm,
               right: AppSpacing.md,
               child: TextButton(
-                onPressed: () => context.go(AppRoutes.dashboard),
+                onPressed: () =>
+                    ref.read(authProvider.notifier).skipLogin(),
                 child: Text('Skip',
                     style: AppTypography.labelMedium
                         .copyWith(color: AppColors.inkMute)),

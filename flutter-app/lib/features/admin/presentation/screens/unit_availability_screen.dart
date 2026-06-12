@@ -10,11 +10,20 @@ import 'package:builder_bridge/core/widgets/bb_loading_state.dart';
 import 'package:builder_bridge/features/admin/presentation/providers/admin_providers.dart';
 import 'package:builder_bridge/features/inventory/data/models/unit_model.dart';
 
-class UnitAvailabilityScreen extends ConsumerWidget {
+class UnitAvailabilityScreen extends ConsumerStatefulWidget {
   const UnitAvailabilityScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<UnitAvailabilityScreen> createState() =>
+      _UnitAvailabilityScreenState();
+}
+
+class _UnitAvailabilityScreenState
+    extends ConsumerState<UnitAvailabilityScreen> {
+  String _filter = 'all';
+
+  @override
+  Widget build(BuildContext context) {
     final unitsAsync = ref.watch(allUnitsProvider);
 
     return Scaffold(
@@ -25,13 +34,85 @@ class UnitAvailabilityScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
         title: Text('Unit Availability', style: AppTypography.labelLarge),
       ),
-      body: unitsAsync.when(
-        loading: () => const BBLoadingState(),
-        error: (_, __) => BBErrorState(
-          message: 'Could not load units',
-          onRetry: () => ref.invalidate(allUnitsProvider),
-        ),
-        data: (units) => _UnitList(units: units),
+      body: Column(
+        children: [
+          _FilterBar(
+            selected: _filter,
+            onChanged: (f) => setState(() => _filter = f),
+            units: unitsAsync.valueOrNull ?? [],
+          ),
+          Expanded(
+            child: unitsAsync.when(
+              loading: () => const BBLoadingState(),
+              error: (_, __) => BBErrorState(
+                message: 'Could not load units',
+                onRetry: () => ref.invalidate(allUnitsProvider),
+              ),
+              data: (units) {
+                final filtered = _filter == 'all'
+                    ? units
+                    : units.where((u) => u.status == _filter).toList();
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Text('No $_filter units.',
+                        style: AppTypography.bodyMedium
+                            .copyWith(color: AppColors.inkMute)),
+                  );
+                }
+                return _UnitList(units: filtered);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterBar extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+  final List<UnitModel> units;
+
+  const _FilterBar({
+    required this.selected,
+    required this.onChanged,
+    required this.units,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = <String, int>{};
+    for (final u in units) {
+      counts[u.status] = (counts[u.status] ?? 0) + 1;
+    }
+
+    final filters = [
+      ('all', 'All', units.length),
+      ('available', 'Available', counts['available'] ?? 0),
+      ('reserved', 'Reserved', counts['reserved'] ?? 0),
+      ('booked', 'Booked', counts['booked'] ?? 0),
+      ('sold', 'Sold', counts['sold'] ?? 0),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+      child: Row(
+        children: filters
+            .map((f) => Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  child: ChoiceChip(
+                    label: Text('${f.$2} (${f.$3})',
+                        style: AppTypography.labelSmall),
+                    selected: selected == f.$1,
+                    onSelected: (_) => onChanged(f.$1),
+                    selectedColor: AppColors.accentSoft,
+                    backgroundColor: AppColors.surface,
+                    side: const BorderSide(color: AppColors.line),
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
@@ -71,7 +152,8 @@ class _TowerSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
             units.first.towerName ?? 'Tower ${units.first.towerId}',
-            style: AppTypography.labelMedium.copyWith(color: AppColors.inkMute),
+            style:
+                AppTypography.labelMedium.copyWith(color: AppColors.inkMute),
           ),
         ),
         Container(
@@ -117,7 +199,8 @@ class _UnitRow extends ConsumerWidget {
                         style: AppTypography.labelLarge),
                     Text(
                       '${unit.type} · Floor ${unit.floor} · '
-                      '${unit.areaSqft.toStringAsFixed(0)} sqft',
+                      '${unit.areaSqft.toStringAsFixed(0)} sqft · '
+                      '${unit.formattedPrice}',
                       style: AppTypography.bodySmall,
                     ),
                   ],
@@ -170,8 +253,8 @@ class _StatusDropdown extends ConsumerWidget {
 
   BBBadgeStatus _badgeStatus(String s) => switch (s) {
         'available' => BBBadgeStatus.ok,
-        'reserved'  => BBBadgeStatus.warn,
-        'booked'    => BBBadgeStatus.danger,
-        _           => BBBadgeStatus.neutral,
+        'reserved' => BBBadgeStatus.warn,
+        'booked' => BBBadgeStatus.danger,
+        _ => BBBadgeStatus.neutral,
       };
 }

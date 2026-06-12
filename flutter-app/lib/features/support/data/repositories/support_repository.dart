@@ -16,6 +16,24 @@ class SupportRepository {
     return rows.map(TicketModel.fromJson).toList();
   }
 
+  Future<List<Map<String, dynamic>>> getAllWithCustomerName() async {
+    return _db.rawQuery('''
+      SELECT t.*, u.name AS customer_name, u.phone AS customer_phone
+      FROM tickets t
+      JOIN users u ON t.user_id = u.id
+      ORDER BY t.created_at DESC
+    ''');
+  }
+
+  Future<void> updateStatus(int ticketId, String status) async {
+    await _db.update(
+      'tickets',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [ticketId],
+    );
+  }
+
   Future<TicketModel?> getById(int id) async {
     final db = _db;
     final rows = await db.query('tickets', where: 'id = ?', whereArgs: [id]);

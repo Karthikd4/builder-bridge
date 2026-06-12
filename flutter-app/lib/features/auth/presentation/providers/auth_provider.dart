@@ -82,6 +82,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> skipLogin() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final user = await _repo.loginWithPhone('0000000000');
+      state = state.copyWith(user: user, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState();

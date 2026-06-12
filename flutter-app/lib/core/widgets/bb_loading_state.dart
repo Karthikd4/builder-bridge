@@ -17,6 +17,8 @@ class BBLoadingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.md),
       itemCount: itemCount,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
